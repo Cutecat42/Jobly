@@ -49,7 +49,103 @@ class Company {
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 
-  static async findAll() {
+  static async findAll(name, minEmployees, maxEmployees) {
+    if (name && minEmployees && maxEmployees) {
+      if (minEmployees > maxEmployees) {
+        throw new BadRequestError(`Minimum employees cannot be greater than maximum employees.`);
+      }
+      const companiesRes = await db.query(
+      `SELECT handle,
+              name,
+              description,
+              num_employees AS "numEmployees",
+              logo_url AS "logoUrl"
+              FROM companies
+              WHERE name ILIKE $1 
+              AND num_employees >= $2
+              AND num_employees <= $3
+              ORDER BY name`, [`%${name}%`, minEmployees, maxEmployees]);
+    return companiesRes.rows;
+    }
+      if (name && minEmployees) {
+        const companiesRes = await db.query(
+        `SELECT handle,
+                name,
+                description,
+                num_employees AS "numEmployees",
+                logo_url AS "logoUrl"
+                FROM companies
+                WHERE name ILIKE $1 
+                AND num_employees >= $2
+                ORDER BY name`, [`%${name}%`, minEmployees]);
+      return companiesRes.rows;
+    }
+      if (name && maxEmployees) {
+        const companiesRes = await db.query(
+        `SELECT handle,
+                name,
+                description,
+                num_employees AS "numEmployees",
+                logo_url AS "logoUrl"
+                FROM companies
+                WHERE name ILIKE $1 
+                AND num_employees <= $2
+                ORDER BY name`, [`%${name}%`, maxEmployees]);
+      return companiesRes.rows;
+    }
+      if (minEmployees && maxEmployees) {
+        if (minEmployees > maxEmployees) {
+          throw new BadRequestError(`Minimum employees cannot be greater than maximum employees.`);
+        }
+        const companiesRes = await db.query(
+        `SELECT handle,
+                name,
+                description,
+                num_employees AS "numEmployees",
+                logo_url AS "logoUrl"
+                FROM companies
+                WHERE num_employees >= $1
+                AND num_employees <= $2
+                ORDER BY name`, [minEmployees, maxEmployees]);
+      return companiesRes.rows;
+    }
+      if (minEmployees) {
+        const companiesRes = await db.query(
+        `SELECT handle,
+                name,
+                description,
+                num_employees AS "numEmployees",
+                logo_url AS "logoUrl"
+                FROM companies
+                WHERE num_employees >= $1
+                ORDER BY name`, [minEmployees]);
+      return companiesRes.rows;
+    }
+      if (maxEmployees) {
+        const companiesRes = await db.query(
+        `SELECT handle,
+                name,
+                description,
+                num_employees AS "numEmployees",
+                logo_url AS "logoUrl"
+                FROM companies
+                WHERE num_employees <= $1
+                ORDER BY name`, [maxEmployees]);
+      return companiesRes.rows;
+    }
+    if (name) {
+      const companiesRes = await db.query(
+      `SELECT handle,
+              name,
+              description,
+              num_employees AS "numEmployees",
+              logo_url AS "logoUrl"
+              FROM companies
+              WHERE name ILIKE $1
+              ORDER BY name`, [`%${name}%`]);
+    return companiesRes.rows;
+  }
+    else {
     const companiesRes = await db.query(
           `SELECT handle,
                   name,
@@ -59,6 +155,7 @@ class Company {
            FROM companies
            ORDER BY name`);
     return companiesRes.rows;
+    }
   }
 
   /** Given a company handle, return data about company.
