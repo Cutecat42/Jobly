@@ -82,14 +82,6 @@ router.get("/:handle", async function (req, res, next) {
  * Authorization required: isAdmin
  */
 
-// *****************
-// {
-//     "error": {
-//       "message": "bind message supplies 2 parameters, but prepared statement \"\" requires 1",
-//       "status": 500
-//     }
-// }
-
 router.patch("/:id", isAdmin, async function (req, res, next) {
   try {
     const job = await Job.update(req.params.id, req.body);

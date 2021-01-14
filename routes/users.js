@@ -63,14 +63,13 @@ router.get("/", isAdmin, async function (req, res, next) {
 
 /** GET /[username] => { user }
  *
- * Returns { username, firstName, lastName, isAdmin }
+ * Returns { username, firstName, lastName, isAdmin, jobs }
  *
  * Authorization required: login
  **/
 
 router.get("/:username", isAdminOrUser, async function (req, res, next) {
   try {
-    // console.log(req.locals)
     const user = await User.get(req.params.username);
     return res.json({ user });
   } catch (err) {
@@ -114,6 +113,23 @@ router.delete("/:username", isAdminOrUser, async function (req, res, next) {
   try {
     await User.remove(req.params.username);
     return res.json({ deleted: req.params.username });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/** POST /[username]/jobs/[id]  { state } => { application }
+ *
+ * Returns {"applied": jobId}
+ *
+ * Authorization required: admin or same-user-as-:username
+ * */
+
+router.post("/:username/jobs/:id", isAdminOrUser, async function (req, res, next) {
+  try {
+    const jobId = +req.params.id;
+    await User.applyToJob(req.params.username, jobId);
+    return res.json({ applied: jobId });
   } catch (err) {
     return next(err);
   }
